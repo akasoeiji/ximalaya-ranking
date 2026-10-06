@@ -65,7 +65,8 @@ docker run --rm -e RUN_MODE=schedule -e SCHEDULE_INTERVAL_SECONDS=86400 \
 | `category.metadataValues` | `XMR_METADATA` | 男频 | 子频道 |
 | `crawl.maxAnchors` | `XMR_MAX_ANCHORS` | 0 | 限制主播数，0=全部 |
 | `crawl.workers` | `XMR_WORKERS` | 6 | 并发线程 |
-| `tiers.host` / `tiers.album` | - | [3e8, 2e8, 1e8, 5e7] | 分档阈值（降序，可增删） |
+| `crawl.extraAnchors` | `XMR_EXTRA_ANCHORS` | [] | 额外指定主播UID（逗号分隔），不在分类页也会被抓取 |
+| `tiers.host` / `tiers.album` | - | [3e8, 2e8, 1e8, 5e7, 3e7, 1e7, 5e6] | 分档阈值（降序，可增删） |
 
 ## 项目结构
 

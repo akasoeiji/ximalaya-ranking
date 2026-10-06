@@ -16,6 +16,7 @@ DEFAULTS = {
         "workers": 6,               # 并发线程
         "timeout": 20,              # 请求超时(秒)
         "retries": 5,               # 重试次数
+        "extraAnchors": [],         # 额外指定主播UID(不在分类页也会被抓取), 如 [79758517]
     },
     "tiers": {
         # 档位阈值(升序生效), 单位: 次播放
@@ -38,6 +39,9 @@ def _apply_env(cfg: dict) -> dict:
     w = cfg["crawl"]
     w["maxAnchors"] = int(os.environ.get("XMR_MAX_ANCHORS", w["maxAnchors"]))
     w["workers"] = int(os.environ.get("XMR_WORKERS", w["workers"]))
+    extra = os.environ.get("XMR_EXTRA_ANCHORS")
+    if extra:
+        w["extraAnchors"] = [u.strip() for u in extra.split(",") if u.strip()]
     cfg["output"]["dir"] = os.environ.get("XMR_OUT", cfg["output"]["dir"])
     return cfg
 

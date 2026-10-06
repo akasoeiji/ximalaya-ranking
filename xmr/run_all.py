@@ -53,6 +53,10 @@ def main():
         print(f"[crawl] 分类页抓取完成: 专辑 {len(cat_albums)}")
         anchor_ids = sorted({str(a["anchorId"]) for a in cat_albums if a.get("anchorId")})
         print(f"[crawl] 去重主播 {len(anchor_ids)} 位")
+        extra = [str(u) for u in cfg["crawl"].get("extraAnchors") or [] if str(u) not in anchor_ids]
+        if extra:
+            print(f"[crawl] 追加指定主播 {len(extra)} 位: {', '.join(extra)}")
+        anchor_ids = extra + anchor_ids
         anchor_full = crawler.fetch_anchors(anchor_ids, cfg, cache_dir=cache_dir)
         json.dump(cat_albums, open(os.path.join(cache_dir, "category_albums.json"), "w", encoding="utf-8"), ensure_ascii=False)
         json.dump({"pages": cfg["category"]["pages"], "pageSize": cfg["category"]["pageSize"]},
