@@ -75,9 +75,10 @@ tr.arow:hover td{background:#fafbfd} tr.arow.expanded td{background:#fff8f0}
 .rank{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;border-radius:8px;font-weight:700;font-size:13px;color:#868e96;background:#f1f3f5}
 .rank.top{color:#fff}
 .who{display:flex;align-items:center;gap:9px;min-width:0}
+.who{display:flex;align-items:center;gap:9px;min-width:0;cursor:pointer}
+.who:hover .nm{color:var(--brand);text-decoration:underline}
 .avatar{width:34px;height:34px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex:none}
 .who .nm{font-weight:600;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px;display:block}
-.who a{text-decoration:none} .who .nm:hover{color:var(--brand)}
 .who .sig{font-size:11px;color:#adb5bd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px;display:block}
 .tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600;color:#fff;white-space:nowrap}
 .tag.tgray{background:#ced4da;color:#868e96}
@@ -148,7 +149,7 @@ table.alb tr:hover td{background:#fffdf5}
    </select>
   </div>
   <div class="bar" style="margin-top:9px"><div class="chips" id="chips"></div></div>
-  <div class="meta"><span id="cnt"></span><span id="tip">💡 点击「作品」展开该主播的爆款专辑明细</span></div>
+  <div class="meta"><span id="cnt"></span><span id="tip">💡 点击主播名称或「作品」展开专辑列表（按播放量降序）</span></div>
  </div>
 
  <div class="tbl-card">
@@ -249,8 +250,8 @@ function render(){
   var a=arr[i],r=i+1,ht=hTier(a[6]);
   var top3=(ht>=0&&ht<NC&&r<=3);
   var rk='<span class="rank"'+(top3?' style="background:'+tc(ht)+';color:#fff"':'')+'>'+r+'</span>';
-  var who='<div class="who"><span class="avatar" style="background:'+avatarColor(a[1])+'">'+esc(a[1].slice(0,1))+'</span>'
-   +'<span style="min-width:0"><a href="https://www.ximalaya.com/zhubo/'+a[0]+'" target="_blank"><span class="nm">'+esc(a[1])+'</span></a>'
+  var who='<div class="who" title="点击展开/收起专辑列表（按播放量降序）" onclick="toggle(\''+a[0]+'\')"><span class="avatar" style="background:'+avatarColor(a[1])+'">'+esc(a[1].slice(0,1))+'</span>'
+   +'<span style="min-width:0"><span class="nm">'+esc(a[1])+'</span>'
    +(a[4]?'<span class="sig">'+esc(a[4])+'</span>':'')+'</span></div>';
   var colspan=(mode==="A")?8:7;
   if(mode==="A"){
@@ -290,13 +291,14 @@ function toggle(uid){
    var scope=(mode==="B"&&state.t!=="all")?+state.t:null;
    var scopeTxt=scope===null?"全部达标专辑（≥ "+thName(AT2[AT2.length-1])+"）":"仅"+AN[scope]+"专辑";
    document.getElementById("inner-"+uid).innerHTML=
-    '<div class="dhead"><b>'+esc(a[1])+' 的分档作品</b><span>总播放 <b style="color:#d6336c">'+fmt(a[6])+'</b></span>'
+    '<div class="dhead"><b>'+esc(a[1])+' 的专辑列表</b><span style="color:#e8590c;font-weight:600">↓ 按播放量降序</span><span>总播放 <b style="color:#d6336c">'+fmt(a[6])+'</b></span>'
     +'<span>粉丝 '+fmt(a[2])+'</span><span>全部专辑 '+a[7].length+' 张</span>'
     +'<span>当前展示：'+(scope===null?hotCount(a)+' 张达标爆款':scopeTxt)+'</span></div>'
     +albumTable(a,scope);
    rendered[uid]=true;
   }
   det.style.display="";row.classList.add("expanded");
+  det.scrollIntoView({behavior:"smooth",block:"nearest"});
  }else{det.style.display="none";row.classList.remove("expanded");}
 }
 
@@ -314,7 +316,7 @@ function setMode(m){
  document.getElementById("vtabA").classList.toggle("on",m==="A");
  document.getElementById("vtabB").classList.toggle("on",m==="B");
  buildChips();
- document.getElementById("tip").textContent=m==="B"?"💡 点击「作品」展开该主播的爆款专辑明细":"💡 点击「作品」展开该主播全部达标专辑（按播放量降序）";
+ document.getElementById("tip").textContent=m==="B"?"💡 点击主播名称或「作品」展开专辑列表（按播放量降序）":"💡 点击主播名称或「作品」展开全部达标专辑（按播放量降序）";
  render();
 }
 
