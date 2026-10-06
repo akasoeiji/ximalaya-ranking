@@ -1,0 +1,13 @@
+services:
+  ximalaya-ranking:
+    image: totootao/ximalaya-ranking:latest
+    build: .
+    container_name: ximalaya-ranking
+    environment:
+      - RUN_MODE=manual              # manual=跑一次 | schedule=定时循环
+      - SCHEDULE_INTERVAL_SECONDS=86400
+      - XMR_PAGES=50
+      - XMR_MAX_ANCHORS=0
+    volumes:
+      - ./output:/app/output
+    restart: unless-stopped          # schedule 模式建议开启

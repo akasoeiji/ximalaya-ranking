@@ -1,0 +1,20 @@
+{
+  "category": {
+    "categoryId": 3,
+    "metadataValues": "男频",
+    "sort": 1,
+    "pages": 50,
+    "pageSize": 40
+  },
+  "crawl": {
+    "maxAnchors": 0,
+    "workers": 6,
+    "timeout": 20,
+    "retries": 5
+  },
+  "tiers": {
+    "host": [300000000, 200000000, 100000000, 50000000],
+    "album": [300000000, 200000000, 100000000, 50000000]
+  },
+  "output": { "dir": "output" }
+}
