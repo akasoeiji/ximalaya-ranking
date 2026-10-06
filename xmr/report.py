@@ -6,7 +6,7 @@ import datetime
 import json
 import os
 
-TIER_COLORS = ["#e03131", "#d9480f", "#e8590c", "#1971c2", "#0c8599", "#6741d9"]
+TIER_COLORS = ["#e03131", "#d9480f", "#e8590c", "#1971c2", "#0c8599", "#6741d9", "#2f9e44"]
 
 
 def _fmt(n):
@@ -41,14 +41,14 @@ a{color:inherit}
 .hero h1{margin:0 0 6px;font-size:25px}
 .hero h1 .em{background:linear-gradient(90deg,#ffd43b,#ff922b);-webkit-background-clip:text;background-clip:text;color:transparent}
 .hero .sub{font-size:12.5px;opacity:.78;line-height:1.7}
-.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:9px;margin-top:18px;position:relative;z-index:2}
+.kpis{display:grid;grid-template-columns:repeat(8,1fr);gap:9px;margin-top:18px;position:relative;z-index:2}
 .kpi{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:11px 6px;text-align:center}
 .kpi b{display:block;font-size:21px;font-variant-numeric:tabular-nums}
 .kpi span{font-size:11px;opacity:.75}
 .kpi.hot b{color:#ffd43b}
 .ov-card{background:var(--card);border-radius:16px;box-shadow:0 2px 10px rgba(20,40,80,.06);padding:16px 20px 8px;margin-top:110px}
 .ov-card h3{margin:0 0 12px;font-size:16px}
-.ov{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.ov{display:grid;grid-template-columns:repeat(auto-fit,minmax(196px,1fr));gap:10px;margin-bottom:12px}
 .ov .cell{border-radius:12px;padding:12px 14px;color:#fff}
 .ov .cell b{display:block;font-size:24px;font-variant-numeric:tabular-nums}
 .ov .cell span{font-size:11.5px;opacity:.85}
@@ -109,7 +109,7 @@ table.alb tr:hover td{background:#fffdf5}
 .note{background:var(--card);border-radius:14px;padding:16px 20px;margin-top:18px;font-size:12px;color:var(--sub);line-height:2}
 .note b{color:var(--ink)}
 .totop{position:fixed;right:22px;bottom:26px;width:42px;height:42px;border-radius:50%;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.15);border:1px solid var(--line);cursor:pointer;font-size:16px;color:#495057;z-index:60}
-@media(max-width:900px){.kpis{grid-template-columns:repeat(3,1fr)}.ov{grid-template-columns:repeat(2,1fr)}.hide-m{display:none}.who .sig{display:none}.who .nm{max-width:110px}}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(4,1fr)}.ov{grid-template-columns:repeat(2,1fr)}.hide-m{display:none}.who .sig{display:none}.who .nm{max-width:110px}}
 
 /* ===== 移动端专属优化 (≤700px: 卡片式布局) ===== */
 @media(max-width:700px){
@@ -118,7 +118,7 @@ table.alb tr:hover td{background:#fffdf5}
   .hero h1{font-size:18.5px;letter-spacing:0}
   .hero h1 .em{display:block;margin-top:2px}
   .hero .sub{font-size:10.5px;line-height:1.6}
-  .kpis{grid-template-columns:repeat(3,1fr);gap:6px;margin-top:14px}
+  .kpis{grid-template-columns:repeat(2,1fr);gap:6px;margin-top:14px}
   .kpi{padding:8px 4px;border-radius:10px}
   .kpi b{font-size:16px}
   .kpi span{font-size:10px}
@@ -198,6 +198,8 @@ table.alb tr:hover td{background:#fffdf5}
    <div class="kpi"><b>__NA1__</b><span>专辑 ≥ __TAN1__</span></div>
    <div class="kpi"><b>__NA2__</b><span>专辑 ≥ __TAN2__</span></div>
    <div class="kpi"><b>__NA3__</b><span>专辑 ≥ __TAN3__</span></div>
+   <div class="kpi"><b>__NA4__</b><span>专辑 ≥ __TAN4__</span></div>
+   <div class="kpi"><b>__NA5__</b><span>专辑 ≥ __TAN5__</span></div>
    <div class="kpi"><b>__NHOT__</b><span>拥有爆款的主播</span></div>
   </div>
  </div>
@@ -257,8 +259,8 @@ function hTier(t){for(var i=0;i<HT.length;i++)if(t>=HT[i])return i;return -1;}
 function thName(v){return fmt(v)+"档";}
 var HN=[];for(var i=0;i<HT.length;i++)HN.push(thName(HT[i]));HN.push("未达标");
 var AN=[];for(var i=0;i<AT2.length;i++)AN.push(thName(AT2[i]));
-var NC=Math.min(HT.length,6);
 var TC=__TIER_COLORS__;
+var NC=Math.min(HT.length,TC.length);
 function tc(i){return TC[i%TC.length];}
 var AVC=["#ff6b6b","#ffa94d","#4dabf7","#69db7c","#b197fc","#f783ac","#63e6be","#a9e34b"];
 var mode="B", state={t:"all",q:"",s:0};
@@ -463,7 +465,7 @@ def write_web(anchors, cat_albums_count, stats_d, host_th, album_th, pages, out_
     for c in stats_d["albumTier"]:
         s += c
         cum.append(s)
-    for i in range(4):
+    for i in range(6):
         doc = doc.replace(f"__NA{i}__", str(cum[i]) if i < len(cum) else "0")
         doc = doc.replace(f"__TAN{i}__", alb_names[i].replace("档", "") if i < len(alb_names) else "-")
     with open(out_path, "w", encoding="utf-8") as f:
