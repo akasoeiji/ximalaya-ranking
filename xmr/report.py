@@ -110,6 +110,81 @@ table.alb tr:hover td{background:#fffdf5}
 .note b{color:var(--ink)}
 .totop{position:fixed;right:22px;bottom:26px;width:42px;height:42px;border-radius:50%;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.15);border:1px solid var(--line);cursor:pointer;font-size:16px;color:#495057;z-index:60}
 @media(max-width:900px){.kpis{grid-template-columns:repeat(3,1fr)}.ov{grid-template-columns:repeat(2,1fr)}.hide-m{display:none}.who .sig{display:none}.who .nm{max-width:110px}}
+
+/* ===== 移动端专属优化 (≤700px: 卡片式布局) ===== */
+@media(max-width:700px){
+  .wrap{padding:0 8px 70px}
+  .hero{padding:20px 0 16px;margin-bottom:-74px}
+  .hero h1{font-size:18.5px;letter-spacing:0}
+  .hero h1 .em{display:block;margin-top:2px}
+  .hero .sub{font-size:10.5px;line-height:1.6}
+  .kpis{grid-template-columns:repeat(3,1fr);gap:6px;margin-top:14px}
+  .kpi{padding:8px 4px;border-radius:10px}
+  .kpi b{font-size:16px}
+  .kpi span{font-size:10px}
+  .ov-card{margin-top:92px;padding:13px 12px 8px;border-radius:14px}
+  .ov-card h3{font-size:14.5px;margin-bottom:10px}
+  .ov{grid-template-columns:repeat(2,1fr);gap:8px}
+  .ov .cell{padding:10px;border-radius:10px}
+  .ov .cell b{font-size:18px}
+  .ov .cell span{font-size:10px;line-height:1.5;display:block}
+  .viewtabs{gap:6px;margin-top:10px}
+  .vtab{flex:1 1 auto;padding:8px 6px;font-size:13px;text-align:center}
+  .vtab .d{font-size:10px;margin-top:1px}
+  .toolbar{padding:8px 0 6px}
+  .bar{gap:6px}
+  .search input{font-size:16px;padding:8px 10px 8px 32px;border-radius:9px} /* 16px 防iOS聚焦缩放 */
+  .search .ic{left:10px}
+  select{padding:8px 6px;font-size:12px;max-width:118px;border-radius:9px}
+  .chips{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -8px;padding:2px 8px 6px;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:0 0 auto;font-size:12px;padding:6px 11px;touch-action:manipulation}
+  .chip b{font-weight:700}
+  .meta{font-size:11px;margin-top:6px;gap:4px}
+  .meta #tip{flex-basis:100%;line-height:1.5}
+  /* 主列表 → 卡片 */
+  .tbl-card{border-radius:14px;background:transparent;box-shadow:none;overflow:visible}
+  table.main thead{display:none}
+  table.main,table.main tbody{display:block}
+  tr.arow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;
+    grid-template-areas:"rank who play" "info info ops";
+    gap:6px 10px;align-items:center;background:#fff;
+    border:1px solid var(--line);border-radius:12px;margin:8px 2px;padding:11px 12px;
+    box-shadow:0 1px 3px rgba(20,40,80,.05)}
+  tr.arow td{display:block;padding:0;border:none;background:transparent}
+  tr.arow:hover td{background:transparent}
+  tr.arow.expanded{border-color:#ffc078;background:#fff8f0}
+  td.c-rank{grid-area:rank}
+  td.c-who{grid-area:who}
+  td.c-info{grid-area:info}
+  td.c-play{grid-area:play;text-align:right}
+  td.c-play .num.play{font-size:16.5px}
+  td.c-ops{grid-area:ops;justify-self:stretch}
+  td.c-ops .ext{gap:8px}
+  td.c-ops .btn{flex:1;text-align:center;padding:7px 8px;font-size:12.5px;touch-action:manipulation}
+  .who .nm{max-width:100%;white-space:normal;font-size:15px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .avatar{width:36px;height:36px}
+  /* 专辑明细 → 卡片流 */
+  tr.det{display:block;margin:0 2px 8px}
+  tr.det td{display:block;padding:0 2px;background:transparent}
+  .det-inner{padding:10px 10px 12px;max-height:66vh;border-radius:12px;background:#fbfcfe;box-shadow:0 0 0 1px var(--line)}
+  .dhead{font-size:11px;gap:8px;line-height:1.7}
+  table.alb{box-shadow:0 0 0 1px var(--line);border-radius:10px;background:#fff}
+  table.alb thead{display:none}
+  table.alb,table.alb tbody{display:block}
+  table.alb tr{display:flex;flex-wrap:wrap;align-items:center;gap:3px 10px;padding:9px 10px;border-bottom:1px dashed var(--line)}
+  table.alb tr:last-child{border-bottom:none}
+  table.alb td{border:none;padding:0;background:transparent}
+  table.alb tr:hover td{background:transparent}
+  td.a-title{flex:1 1 100%;order:-1;line-height:1.5;font-size:13.5px}
+  td.a-title a{word-break:break-all}
+  table.alb td.r{display:none}
+  td.a-play{font-size:13.5px}
+  td.a-trk,td.a-fin{font-size:11px;color:var(--sub)}
+  td.a-trk::after{content:" 集"}
+  .totop{right:12px;bottom:14px;width:40px;height:40px}
+  .note{padding:12px 14px;font-size:11.5px;border-radius:12px}
+}
 </style>
 </head>
 <body>
@@ -219,11 +294,11 @@ function albumTable(a,onlyTier){
   if(t<0)continue;
   if(onlyTier!==null&&onlyTier!==undefined&&t!==onlyTier)continue;
   rows+='<tr><td class="r">'+(i+1)+'</td>'
-   +'<td><a href="https://www.ximalaya.com/album/'+al[0]+'" target="_blank">'+esc(al[1])+'</a>'+(al[5]?'<span class="star">⭐</span>':'')+'</td>'
-   +'<td><span class="tag" style="background:'+tc(t)+'">'+AN[t]+'</span></td>'
-   +'<td class="p">'+fmt(al[2])+'</td>'
-   +'<td class="num">'+al[3]+'</td>'
-   +'<td>'+(al[4]?'<span class="st-fin">已完结</span>':'<span class="st-ong">连载中</span>')+'</td></tr>';
+   +'<td class="a-title"><a href="https://www.ximalaya.com/album/'+al[0]+'" target="_blank">'+esc(al[1])+'</a>'+(al[5]?'<span class="star">⭐</span>':'')+'</td>'
+   +'<td class="a-tier"><span class="tag" style="background:'+tc(t)+'">'+AN[t]+'</span></td>'
+   +'<td class="a-play p">'+fmt(al[2])+'</td>'
+   +'<td class="a-trk num">'+al[3]+'</td>'
+   +'<td class="a-fin">'+(al[4]?'<span class="st-fin">已完结</span>':'<span class="st-ong">连载中</span>')+'</td></tr>';
  }
  if(!rows)rows='<tr><td colspan="6" style="color:#adb5bd">该条件下暂无专辑</td></tr>';
  return '<table class="alb"><thead><tr><th>#</th><th>专辑名称</th><th>档位</th><th>播放量</th><th>集数</th><th>状态</th></tr></thead><tbody>'+rows+'</tbody></table>';
@@ -255,22 +330,22 @@ function render(){
    +(a[4]?'<span class="sig">'+esc(a[4])+'</span>':'')+'</span></div>';
   var colspan=(mode==="A")?8:7;
   if(mode==="A"){
-   tb+='<tr class="arow" id="ar-'+a[0]+'"><td>'+rk+'</td><td>'+who+'</td>'
-    +'<td class="hide-m"><span class="tag" style="background:'+(ht>=0?tc(ht):'#ced4da')+';'+(ht<0?'color:#868e96':'')+'">'+HN[ht<0?HT.length:ht]+'</span></td>'
-    +'<td class="num play">'+fmt(a[6])+'</td>'
+   tb+='<tr class="arow" id="ar-'+a[0]+'"><td class="c-rank">'+rk+'</td><td class="c-who">'+who+'</td>'
+    +'<td class="c-info"><span class="tag" style="background:'+(ht>=0?tc(ht):'#ced4da')+';'+(ht<0?'color:#868e96':'')+'">'+HN[ht<0?HT.length:ht]+'</span></td>'
+    +'<td class="c-play"><span class="num play">'+fmt(a[6])+'</span></td>'
     +'<td class="num hide-m">'+a[7].length+'</td>'
     +'<td class="num hide-m">'+fmt(a[2])+'</td>'
     +'<td class="num hide-m">'+(a[5]||0)+'<span class="mini"> 张</span></td>'
-    +'<td><div class="ext"><button class="btn pri" onclick="toggle(\''+a[0]+'\')">作品</button>'
+    +'<td class="c-ops"><div class="ext"><button class="btn pri" onclick="toggle(\''+a[0]+'\')">作品</button>'
     +'<a class="btn" href="https://www.ximalaya.com/zhubo/'+a[0]+'" target="_blank">主页</a></div></td></tr>'
     +'<tr class="det" id="det-'+a[0]+'" style="display:none"><td colspan="'+colspan+'"><div class="det-inner" id="inner-'+a[0]+'"></div></td></tr>';
   }else{
-   tb+='<tr class="arow" id="ar-'+a[0]+'"><td>'+rk+'</td><td>'+who+'</td>'
-    +'<td><div class="badges">'+badges(a)+'</div></td>'
-    +'<td class="num play">'+fmt(a[6])+'</td>'
+   tb+='<tr class="arow" id="ar-'+a[0]+'"><td class="c-rank">'+rk+'</td><td class="c-who">'+who+'</td>'
+    +'<td class="c-info"><div class="badges">'+badges(a)+'</div></td>'
+    +'<td class="c-play"><span class="num play">'+fmt(a[6])+'</span></td>'
     +'<td class="num hide-m">'+hotCount(a)+'</td>'
     +'<td class="num hide-m">'+fmt(a[2])+'</td>'
-    +'<td><div class="ext"><button class="btn pri" onclick="toggle(\''+a[0]+'\')">作品</button>'
+    +'<td class="c-ops"><div class="ext"><button class="btn pri" onclick="toggle(\''+a[0]+'\')">作品</button>'
     +'<a class="btn" href="https://www.ximalaya.com/zhubo/'+a[0]+'" target="_blank">主页</a></div></td></tr>'
     +'<tr class="det" id="det-'+a[0]+'" style="display:none"><td colspan="'+colspan+'"><div class="det-inner" id="inner-'+a[0]+'"></div></td></tr>';
   }
