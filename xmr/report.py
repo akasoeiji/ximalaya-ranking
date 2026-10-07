@@ -101,6 +101,10 @@ table.alb td{padding:6.5px 10px;border-bottom:1px solid #f6f7f9}
 table.alb tr:hover td{background:#fffdf5}
 .alb .r{color:#ced4da;width:34px}
 .alb .p{font-weight:700;color:#d6336c;white-space:nowrap;font-variant-numeric:tabular-nums}
+.scorev{color:#f59f00;font-weight:700;font-size:12.5px;white-space:nowrap;cursor:help}
+.dsort{display:inline-flex;gap:4px;margin-left:auto}
+.dbtn{border:1px solid #dee2e6;background:#fff;border-radius:8px;padding:3px 9px;font-size:11.5px;cursor:pointer;color:#868e96;font-weight:600}
+.dbtn.on{background:#212529;color:#fff;border-color:#212529}
 .alb a{text-decoration:none}.alb a:hover{color:var(--brand)}
 .st-fin{color:#2f9e44;font-size:11.5px}.st-ong{color:#e8590c;font-size:11.5px}
 .star{color:#f59f00;font-size:11px;margin-left:4px}
@@ -180,7 +184,8 @@ table.alb tr:hover td{background:#fffdf5}
   td.a-title a{word-break:break-all}
   table.alb td.r{display:none}
   td.a-play{font-size:13.5px}
-  td.a-trk,td.a-fin{font-size:11px;color:var(--sub)}
+  td.a-trk,td.a-fin,td.a-score{font-size:11px;color:var(--sub)}
+  td.a-score .scorev{font-size:11.5px}
   td.a-trk::after{content:" 集"}
   .totop{right:12px;bottom:14px;width:40px;height:40px}
   .note{padding:12px 14px;font-size:11.5px;border-radius:12px}
@@ -223,6 +228,7 @@ table.alb tr:hover td{background:#fffdf5}
     <option value="1">按爆款专辑数 ↓</option>
     <option value="2">按粉丝数 ↓</option>
     <option value="3">按最高档专辑数 ↓</option>
+    <option value="4">按最高豆瓣评分 ↓</option>
    </select>
   </div>
   <div class="bar" style="margin-top:9px"><div class="chips" id="chips"></div></div>
@@ -242,7 +248,8 @@ table.alb tr:hover td{background:#fffdf5}
   ① 数据源：分类页「有声书-男频」前 <b>__PAGES__</b> 个分页共 <b>__N_ALBUMS_CAT__</b> 张专辑，去重得到 <b>__N_ANCHORS__</b> 位主播，再经主播主页「加载更多」接口抓取全部公开专辑（共 <b>__N_ALBUMS_ALL__</b> 张）；<br>
   ② <b>作品分档模式</b>：按单专辑播放量分档；<b>主播分档模式</b>：按主播全部公开专辑总播放量分档；<br>
   ③ 主播总播放量 = 全部公开专辑播放量之和；⭐ 表示该专辑出现在分类前__PAGES__页榜单中；<br>
-  ④ 数据由开源项目 ximalaya-ranking 自动生成（<a href="https://github.com/totootao/ximalaya-ranking" target="_blank">GitHub</a> · 支持定时/手动任务）。
+  ④ ★ 评分为<b>豆瓣图书评分</b>（悬浮可见评分人数），覆盖播放量 ≥ 1亿的爆款专辑；喜马拉雅站内评分接口未公开，无法获取；专辑列表支持「按播放 / 按评分」切换排序；<br>
+  ⑤ 数据由开源项目 ximalaya-ranking 自动生成（<a href="https://github.com/totootao/ximalaya-ranking" target="_blank">GitHub</a> · 支持定时/手动任务）。
  </div>
 </div>
 <button class="totop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
@@ -257,6 +264,8 @@ function fmt(n){if(n==null)return"-";if(n>=1e8){var v=n/1e8;return(Math.round(v*
 function aTier(p){for(var i=0;i<AT2.length;i++)if(p>=AT2[i])return i;return -1;}
 function hTier(t){for(var i=0;i<HT.length;i++)if(t>=HT[i])return i;return -1;}
 function thName(v){return fmt(v)+"档";}
+function maxScore(a){var m=-1;for(var i=0;i<a[7].length;i++){var r=a[7][i];if(r.length>6&&r[6]!=null&&r[6]>m)m=r[6];}return m;}
+function scoreCell(al){if(al.length<=6||al[6]==null)return '<span class="mini">-</span>';var t='★'+al[6];return '<span class="scorev" title="豆瓣 '+(al[6])+' 分'+(al[7]?' · '+al[7].toLocaleString("en-US")+' 人评':'')+'">'+t+'</span>';}
 var HN=[];for(var i=0;i<HT.length;i++)HN.push(thName(HT[i]));HN.push("未达标");
 var AN=[];for(var i=0;i<AT2.length;i++)AN.push(thName(AT2[i]));
 var TC=__TIER_COLORS__;
@@ -283,27 +292,34 @@ function listOf(){
   if(s===1)return hotCount(y)-hotCount(x)||y[6]-x[6];
   if(s===2)return y[2]-x[2];
   if(s===3)return topCount(y)-topCount(x)||y[6]-x[6];
+  if(s===4)return maxScore(y)-maxScore(x)||y[6]-x[6];
   return y[6]-x[6];
  });
 }
 function avatarColor(nm){var h=0;for(var i=0;i<nm.length;i++)h=(h*31+nm.charCodeAt(i))>>>0;return AVC[h%AVC.length];}
 function esc(s){return(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 
-function albumTable(a,onlyTier){
- var rows="";
+function albumTable(a,onlyTier,sortKey){
+ var rows="",list=[];
  for(var i=0;i<a[7].length;i++){
   var al=a[7][i], t=aTier(al[2]);
   if(t<0)continue;
   if(onlyTier!==null&&onlyTier!==undefined&&t!==onlyTier)continue;
+  list.push(al);
+ }
+ if(sortKey==="score")list.sort(function(x,y){var sx=x.length>6&&x[6]!=null?x[6]:-1,sy=y.length>6&&y[6]!=null?y[6]:-1;return sy-sx||y[2]-x[2];});
+ for(var i=0;i<list.length;i++){
+  var al=list[i], t=aTier(al[2]);
   rows+='<tr><td class="r">'+(i+1)+'</td>'
    +'<td class="a-title"><a href="https://www.ximalaya.com/album/'+al[0]+'" target="_blank">'+esc(al[1])+'</a>'+(al[5]?'<span class="star">⭐</span>':'')+'</td>'
    +'<td class="a-tier"><span class="tag" style="background:'+tc(t)+'">'+AN[t]+'</span></td>'
    +'<td class="a-play p">'+fmt(al[2])+'</td>'
+   +'<td class="a-score">'+scoreCell(al)+'</td>'
    +'<td class="a-trk num">'+al[3]+'</td>'
    +'<td class="a-fin">'+(al[4]?'<span class="st-fin">已完结</span>':'<span class="st-ong">连载中</span>')+'</td></tr>';
  }
- if(!rows)rows='<tr><td colspan="6" style="color:#adb5bd">该条件下暂无专辑</td></tr>';
- return '<table class="alb"><thead><tr><th>#</th><th>专辑名称</th><th>档位</th><th>播放量</th><th>集数</th><th>状态</th></tr></thead><tbody>'+rows+'</tbody></table>';
+ if(!rows)rows='<tr><td colspan="7" style="color:#adb5bd">该条件下暂无专辑</td></tr>';
+ return '<table class="alb"><thead><tr><th>#</th><th>专辑名称</th><th>档位</th><th>播放量</th><th>评分</th><th>集数</th><th>状态</th></tr></thead><tbody>'+rows+'</tbody></table>';
 }
 
 function badges(a){
@@ -358,20 +374,38 @@ function render(){
 }
 
 var rendered={};
+var detSort="play";
+function renderDet(uid){
+ var a=null;for(var i=0;i<DATA.length;i++)if(DATA[i][0]===uid){a=DATA[i];break;}
+ if(!a)return;
+ var scope=(mode==="B"&&state.t!=="all")?+state.t:null;
+ var scopeTxt=scope===null?"全部达标专辑（≥ "+thName(AT2[AT2.length-1])+"）":"仅"+AN[scope]+"专辑";
+ var so='<span class="dsort"><button class="dbtn'+(detSort==="play"?" on":"")+'" onclick="setDetSort(\'play\')">按播放 ↓</button>'
+  +'<button class="dbtn'+(detSort==="score"?" on":"")+'" onclick="setDetSort(\'score\')">按评分 ↓</button></span>';
+ document.getElementById("inner-"+uid).innerHTML=
+  '<div class="dhead"><b>'+esc(a[1])+' 的专辑列表</b><span style="color:#e8590c;font-weight:600">↓ '+((detSort==="score")?"按豆瓣评分降序":"按播放量降序")+'</span><span>总播放 <b style="color:#d6336c">'+fmt(a[6])+'</b></span>'
+  +'<span>粉丝 '+fmt(a[2])+'</span><span>全部专辑 '+a[7].length+' 张</span>'
+  +'<span>当前展示：'+(scope===null?hotCount(a)+' 张达标爆款':scopeTxt)+'</span>'+so+'</div>'
+  +albumTable(a,scope,detSort);
+}
+function setDetSort(k){
+ if(detSort===k)return;
+ detSort=k;
+ var open=document.querySelectorAll('tr.det').length?document.querySelectorAll('tr.det'):[];
+ for(var i=0;i<open.length;i++){
+  if(open[i].style.display!=="none"){
+   var uid=open[i].id.replace("det-","");
+   if(document.getElementById("inner-"+uid))renderDet(uid);
+  }
+ }
+}
 function toggle(uid){
  var det=document.getElementById("det-"+uid),row=document.getElementById("ar-"+uid);
  if(!det||!row)return;
  var open=det.style.display==="none";
  if(open){
   if(!rendered[uid]){
-   var a=null;for(var i=0;i<DATA.length;i++)if(DATA[i][0]===uid){a=DATA[i];break;}
-   var scope=(mode==="B"&&state.t!=="all")?+state.t:null;
-   var scopeTxt=scope===null?"全部达标专辑（≥ "+thName(AT2[AT2.length-1])+"）":"仅"+AN[scope]+"专辑";
-   document.getElementById("inner-"+uid).innerHTML=
-    '<div class="dhead"><b>'+esc(a[1])+' 的专辑列表</b><span style="color:#e8590c;font-weight:600">↓ 按播放量降序</span><span>总播放 <b style="color:#d6336c">'+fmt(a[6])+'</b></span>'
-    +'<span>粉丝 '+fmt(a[2])+'</span><span>全部专辑 '+a[7].length+' 张</span>'
-    +'<span>当前展示：'+(scope===null?hotCount(a)+' 张达标爆款':scopeTxt)+'</span></div>'
-    +albumTable(a,scope);
+   renderDet(uid);
    rendered[uid]=true;
   }
   det.style.display="";row.classList.add("expanded");
@@ -504,7 +538,7 @@ def write_csvs(anchors, cat_albums, host_th, album_th, out_dir):
     with open(p2, "w", newline="", encoding="utf-8-sig") as f:
         w = csv.writer(f)
         w.writerow(["主播档位", "主播(总播放降序)", "主播总播放", "专辑内排名", "专辑名",
-                    "专辑档位", "播放量", "播放(格式化)", "集数", "完结", "链接", "分类页上榜"])
+                    "专辑档位", "播放量", "播放(格式化)", "豆瓣评分", "评分人数", "集数", "完结", "链接", "分类页上榜"])
         for a in anchors:
             ti = host_tier_i(a[6])
             if ti >= len(host_th):
@@ -513,8 +547,10 @@ def write_csvs(anchors, cat_albums, host_th, album_th, out_dir):
                 at = alb_tier_i(al[2])
                 if at < 0:
                     continue
+                sc = al[6] if len(al) > 6 else None
+                vt = al[7] if len(al) > 7 else None
                 w.writerow([host_names[ti], a[1], _fmt(a[6]), i, al[1], alb_names[at],
-                            al[2], _fmt(al[2]), al[3], "完结" if al[4] else "连载/未知",
+                            al[2], _fmt(al[2]), sc, vt, al[3], "完结" if al[4] else "连载/未知",
                             f"https://www.ximalaya.com/album/{al[0]}",
                             "是" if al[5] else ""])
 

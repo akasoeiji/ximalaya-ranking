@@ -2,8 +2,9 @@
 """分析: 组装主播/专辑记录, 按阈值分档排序"""
 
 
-def build_anchors(cat_albums: list, anchor_full: dict) -> tuple:
-    """返回 (anchors 记录列表, 分类专辑ID集合, 主播->分类上榜数映射)"""
+def build_anchors(cat_albums: list, anchor_full: dict, scores: dict = None) -> tuple:
+    """返回 (anchors 记录列表, 分类专辑ID集合, 主播->分类上榜数映射)
+    scores: {albumId: {score, votes, matched, url}} 豆瓣评分(可选)"""
     cat_ids = {a["albumId"] for a in cat_albums}
     in_cat = {}
     for a in cat_albums:
@@ -16,9 +17,13 @@ def build_anchors(cat_albums: list, anchor_full: dict) -> tuple:
         albs = []
         for al in info.get("albums") or []:
             aid = al.get("id")
-            albs.append([aid, al.get("title", ""), al.get("playCount") or 0,
-                         al.get("trackCount") or 0, 1 if al.get("isFinished") else 0,
-                         1 if aid in cat_ids else 0])
+            row = [aid, al.get("title", ""), al.get("playCount") or 0,
+                   al.get("trackCount") or 0, 1 if al.get("isFinished") else 0,
+                   1 if aid in cat_ids else 0]
+            if scores is not None:
+                sc = scores.get(str(aid)) or {}
+                row += [sc.get("score"), sc.get("votes")]
+            albs.append(row)
         albs.sort(key=lambda x: -x[2])
         total = sum(a[2] for a in albs)
         anchors.append([str(uid), info.get("nickName") or ("主播" + str(uid)),

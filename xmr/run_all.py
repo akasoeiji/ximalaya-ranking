@@ -13,7 +13,7 @@ import shutil
 import sys
 
 from . import config as cfgmod
-from . import crawler, analyze, report
+from . import crawler, analyze, report, douban
 
 
 def main():
@@ -22,6 +22,7 @@ def main():
     ap.add_argument("--pages", type=int, default=None, help="分类分页数(默认50)")
     ap.add_argument("--max-anchors", type=int, default=None, help="限制主播抓取数, 0=全部")
     ap.add_argument("--skip-crawl", action="store_true", help="跳过爬取, 使用缓存生成报告")
+    ap.add_argument("--skip-scores", action="store_true", help="跳过豆瓣评分抓取(仍使用已有缓存)")
     ap.add_argument("--config", default=None, help="config.json 路径")
     args = ap.parse_args()
 
@@ -62,8 +63,27 @@ def main():
         json.dump({"pages": cfg["category"]["pages"], "pageSize": cfg["category"]["pageSize"]},
                   open(os.path.join(cache_dir, "run_config.json"), "w", encoding="utf-8"))
 
+    # ---------- 1.5 豆瓣评分 ----------
+    def _score_cache_path() -> str:
+        name = cfg["douban"]["cache"]
+        if os.path.isabs(name):
+            return name
+        root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        return os.path.join(root, name)
+
+    scores = {}
+    sp = _score_cache_path()
+    if os.path.exists(sp):
+        scores = json.load(open(sp, encoding="utf-8"))
+        print(f"[scores] 载入评分缓存 {len(scores)} 条: {sp}")
+    if cfg["douban"]["enabled"] and not args.skip_scores and not args.skip_crawl:
+        scores = douban.backfill(anchor_full, sp,
+                                 min_play=cfg["douban"]["minPlay"],
+                                 delay=cfg["douban"]["delay"],
+                                 limit=cfg["douban"]["limit"])
+
     # ---------- 2. 分析 ----------
-    anchors, _, _ = analyze.build_anchors(cat_albums, anchor_full)
+    anchors, _, _ = analyze.build_anchors(cat_albums, anchor_full, scores or None)
     stats_d = analyze.stats(anchors, cfg["tiers"]["host"], cfg["tiers"]["album"])
     print(f"[analyze] 主播 {stats_d['anchors']} | 专辑 {stats_d['totalAlbums']} | "
           f"爆款主播 {stats_d['hotAnchors']} | 主播分档(精确) {stats_d['hostTier']} | 未达标 {stats_d['hostBelow']}")
