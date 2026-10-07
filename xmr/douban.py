@@ -140,8 +140,9 @@ def _done(entry) -> bool:
 
 
 def backfill(anchor_full: dict, cache_path: str, min_play: int = 100000000,
-             delay: float = 2.5, limit: int = 0, log=print) -> dict:
-    """增量补全评分: 已有评分/明确无结果的跳过; 风控条目保留待下轮"""
+             delay: float = 2.5, limit: int = 0, max_seconds: int = 0, log=print) -> dict:
+    """增量补全评分: 已有评分/明确无结果的跳过; 风控条目保留待下轮
+    max_seconds: 时间预算(秒), 0=不限; 超时后停止本轮(已完成部分已缓存)"""
     cache = {}
     if os.path.exists(cache_path):
         with open(cache_path, encoding="utf-8") as f:
@@ -158,7 +159,12 @@ def backfill(anchor_full: dict, cache_path: str, min_play: int = 100000000,
     todo = [x for x in albs if not _done(cache.get(str(x[1])))]
     log(f"[douban] 目标 {len(albs)} 张(≥{min_play/1e8:.0f}亿), 已完成 {len(albs)-len(todo)}, 待查 {len(todo)}")
     done = ok = consec_skip = 0
+    import time as _t
+    t0 = _t.time()
     for i, (pc, aid, title) in enumerate(todo):
+        if max_seconds and _t.time() - t0 > max_seconds:
+            log(f"[douban] 达到时间预算 {max_seconds}s, 提前结束本轮(已完成部分已缓存)")
+            break
         try:
             r = fetch_score(title, log=log)
         except Blocked as e:

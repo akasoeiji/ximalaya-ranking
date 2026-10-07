@@ -30,6 +30,7 @@ DEFAULTS = {
         "minPlay": 100000000,      # 仅给播放量≥此值的专辑抓评分(1亿)
         "delay": 1.5,              # 请求间隔(秒), 豆瓣风控需低频
         "limit": 0,                # 本次最多新查条数, 0=不限制
+        "maxSeconds": 600,         # 单轮时间预算(秒), 0=不限; CI建议≤600
         "cache": "douban_scores.json",  # 评分缓存文件(相对输出目录; 建议入git供CI复用)
     },
     "output": {"dir": "output"},

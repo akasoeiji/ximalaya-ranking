@@ -80,7 +80,8 @@ def main():
         scores = douban.backfill(anchor_full, sp,
                                  min_play=cfg["douban"]["minPlay"],
                                  delay=cfg["douban"]["delay"],
-                                 limit=cfg["douban"]["limit"])
+                                 limit=cfg["douban"]["limit"],
+                                 max_seconds=cfg["douban"].get("maxSeconds", 600))
 
     # ---------- 2. 分析 ----------
     anchors, _, _ = analyze.build_anchors(cat_albums, anchor_full, scores or None)
