@@ -1,29 +1,36 @@
 # ximalaya-ranking 🎧
 
-喜马拉雅「有声书-男频」分类（[a3_b5162](https://www.ximalaya.com/category/a3_b5162/)）**主播 / 专辑播放量分档**工具：
-爬取分类前 50 个分页 → 去重主播 → 逐主播抓取个人主页全部公开专辑 → 按 **主播总播放量 / 单专辑播放量** 双维度分档（3亿 / 2亿 / 1亿 / 5000万 / 3000万 / 1000万 / 500万）→ 生成交互式排行榜网页 + CSV。
+喜马拉雅**多分类**「主播 / 专辑播放量分档」工具：对每个分类爬取前 50 个分页 → 去重主播 → 逐主播抓取个人主页全部公开专辑 → 按 **主播总播放量 / 单专辑播放量** 双维度分档（3亿 / 2亿 / 1亿 / 5000万 / 3000万 / 1000万 / 500万）→ 生成交互式排行榜网页 + CSV。
 
-> 纯 Python 标准库实现，**零第三方依赖**。
+当前内置分类：
+
+| 分类 | URL | categoryId | 子频道 |
+|---|---|---|---|
+| 有声书-男频 | [a3_b5162](https://www.ximalaya.com/category/a3_b5162/) | 3 | 男频 |
+| 生活-生活闲聊 | [a1006_b294641](https://www.ximalaya.com/category/a1006_b294641/) | 1006 | 生活闲聊 |
+
+> 纯 Python 标准库实现，**零第三方依赖**。分类可在 `config.json` 中自由增删。
 
 ## 功能
 
+- **多分类并行**：`config.json` 中配置 `categories` 列表，每个分类独立爬取、独立生成榜单，输出到 `output/{分类key}/`，并生成总索引页 `output/index.html`
 - **分类分页爬取**：`/revision/category/v2/albums` 接口，默认 50 页 × 40 张（服务端深度上限约 2016 张）
 - **主播主页爬取**：`/revision/user/pub`「加载更多」接口，抓取每位主播全部公开专辑，支持并发、断点续抓
 - **双维度分档**：主播总播放 = 全部公开专辑播放量之和；档位阈值可在 `config.json` 调整
-- **豆瓣评分**：自动为播放量 ≥1亿的爆款专辑匹配豆瓣图书评分（`xmr/douban.py`，标题清洗 + suggest 匹配 + 低频抓取 + 增量缓存 `douban_scores.json`）；喜马拉雅站内评分接口未公开。专辑列表支持「按播放 / 按评分」切换，主播列表支持「按最高豆瓣评分」排序
-- **报告输出**：单文件交互式网页（搜索 / 分档筛选 / 排序 / 展开作品明细，离线可用）+ 3 份 CSV + summary.json
+- **豆瓣评分**：自动为播放量 ≥1亿的爆款专辑匹配豆瓣图书评分（`xmr/douban.py`，标题清洗 + suggest 匹配 + 低频抓取 + 增量缓存 `douban_scores.json`，跨分类共享）；专辑列表支持「按播放 / 按评分」切换
+- **报告输出**：每个分类单文件交互式网页（搜索 / 分档筛选 / 排序 / 展开作品明细，离线可用）+ 3 份 CSV + summary.json；根目录另生成多分类总索引页
 
 ## 快速开始
 
 ### 本地运行
 
 ```bash
-python -m xmr.run_all                 # 完整跑(50页)
-python -m xmr.run_all --pages 3 --max-anchors 30   # 小规模验证
+python -m xmr.run_all                 # 完整跑(所有分类, 各50页)
+python -m xmr.run_all --pages 3 --max-anchors 30   # 小规模验证(作用于所有分类)
 python -m xmr.run_all --skip-crawl    # 仅用缓存重建报告
 ```
 
-结果输出到 `output/`：`index.html`（排行榜网页）、`喜马拉雅主播专辑播放量分档.html`、3 份 CSV、`summary.json`。
+结果输出到 `output/`：根目录 `index.html`（多分类总索引）与 `summary.json`；每个分类一个子目录 `output/{分类key}/`，内含该分类的 `index.html`（排行榜网页）、`喜马拉雅主播专辑播放量分档.html`、3 份 CSV、`summary.json`。
 
 ### Docker 运行
 
@@ -58,27 +65,42 @@ docker run --rm -e RUN_MODE=schedule -e SCHEDULE_INTERVAL_SECONDS=86400 \
 
 ## 配置（config.json / 环境变量）
 
+### 分类列表（categories）
+
+每个分类支持以下字段：
+
+| 键 | 说明 |
+|---|---|
+| `key` | 分类 URL 标识，形如 `a3_b5162`（也用作输出子目录名） |
+| `name` | 分类展示名，如「有声书-男频」 |
+| `categoryId` | 喜马拉雅一级分类 ID（3=有声书，1006=生活） |
+| `metadataValues` | 子频道名（如「男频」「生活闲聊」） |
+| `sort` | 排序方式，1=最多播放 |
+| `pages` | 抓取分页数，默认 50 |
+| `pageSize` | 每页条数，默认 40 |
+| `extraAnchors` | 该分类额外指定主播 UID（不在分类页也会被抓取） |
+
+### 全局配置
+
 | 键 | 环境变量 | 默认 | 说明 |
 |---|---|---|---|
-| `category.pages` | `XMR_PAGES` | 50 | 分类抓取分页数 |
-| `category.pageSize` | `XMR_PAGE_SIZE` | 40 | 每页专辑数 |
-| `category.categoryId` | `XMR_CATEGORY_ID` | 3 | 3=有声书 |
-| `category.metadataValues` | `XMR_METADATA` | 男频 | 子频道 |
-| `crawl.maxAnchors` | `XMR_MAX_ANCHORS` | 0 | 限制主播数，0=全部 |
+| `crawl.maxAnchors` | `XMR_MAX_ANCHORS` | 0 | 限制每个分类抓取主播数，0=全部 |
 | `crawl.workers` | `XMR_WORKERS` | 6 | 并发线程 |
-| `crawl.extraAnchors` | `XMR_EXTRA_ANCHORS` | [] | 额外指定主播UID（逗号分隔），不在分类页也会被抓取 |
 | `tiers.host` / `tiers.album` | - | [3e8, 2e8, 1e8, 5e7, 3e7, 1e7, 5e6] | 分档阈值（降序，可增删） |
+| `douban.*` | - | - | 豆瓣评分抓取参数 |
+
+> 环境变量 `XMR_PAGES` / `XMR_PAGE_SIZE` 作用于所有分类；`XMR_CATEGORY_ID` / `XMR_METADATA` / `XMR_SORT` 仅在**单分类**场景下切换分类（向后兼容旧用法）。
 
 ## 项目结构
 
 ```
 xmr/
-├── config.py       # 配置加载(config.json + 环境变量)
+├── config.py       # 配置加载(config.json + 环境变量, 支持多分类)
 ├── http_client.py  # urllib 封装(重试/退避)
 ├── crawler.py      # 分类分页 + 主播专辑爬取(并发/断点续抓)
 ├── analyze.py      # 组装与分档统计
-├── report.py       # 交互式HTML + CSV 生成
-└── run_all.py      # CLI 入口
+├── report.py       # 交互式HTML + CSV + 多分类总索引页
+└── run_all.py      # CLI 入口(遍历所有分类)
 .github/workflows/  # crawl.yml(爬取+Pages) / docker-publish.yml(镜像)
 entrypoint.sh       # manual / schedule 双模式
 ```
@@ -86,3 +108,7 @@ entrypoint.sh       # manual / schedule 双模式
 ## 免责声明
 
 本项目仅调用喜马拉雅公开 Web 接口做数据分析，请控制请求频率、勿用于商业用途；数据版权归喜马拉雅及相应创作者所有。
+
+## 需求更新记录
+
+- 2026-10-08 增加「生活-生活闲聊」分类（a1006_b294641），支持多分类并行爬取与分榜单输出，新增多分类总索引页
