@@ -4,11 +4,11 @@ on:
   workflow_dispatch:                # 手动执行
     inputs:
       pages:
-        description: "分类分页数(默认50, 每页40张)"
+        description: "分类分页数(默认50, 每页40张, 作用于所有分类)"
         required: false
         default: "50"
       max_anchors:
-        description: "限制主播抓取数(0=全部)"
+        description: "限制每个分类主播抓取数(0=全部)"
         required: false
         default: "0"
   schedule:                         # 定时任务: 每天 UTC 02:00 = 北京 10:00
@@ -26,7 +26,7 @@ concurrency:
 jobs:
   crawl:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 120
     permissions:
       contents: read
       pages: write
