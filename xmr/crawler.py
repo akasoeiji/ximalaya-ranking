@@ -17,18 +17,19 @@ ANCHOR_PUB_API = ("https://www.ximalaya.com/revision/user/pub"
 ANCHOR_BASIC_API = "https://www.ximalaya.com/revision/user/basic?uid={uid}"
 
 
-def fetch_category(cfg: dict, log=print) -> list:
-    """抓取分类前 N 个分页, 返回去重后的专辑列表"""
-    c = cfg["category"]
-    base = CATEGORY_API.format(pageSize=c["pageSize"], sort=c["sort"],
-                               categoryId=c["categoryId"],
-                               metadata=urllib.parse.quote(c["metadataValues"], safe=""),
+def fetch_category(cat: dict, crawl: dict, log=print) -> list:
+    """抓取单个分类前 N 个分页, 返回去重后的专辑列表
+    cat: 分类配置(categoryId/metadataValues/sort/pages/pageSize)
+    crawl: 全局爬虫配置(timeout/retries)"""
+    base = CATEGORY_API.format(pageSize=cat["pageSize"], sort=cat["sort"],
+                               categoryId=cat["categoryId"],
+                               metadata=urllib.parse.quote(cat["metadataValues"], safe=""),
                                page="{page}")
     albums, empty_streak = {}, 0
-    total_pages = c["pages"]
+    total_pages = cat["pages"]
     for p in range(1, total_pages + 1):
-        d = get_json(base.format(page=p), timeout=cfg["crawl"]["timeout"],
-                     retries=cfg["crawl"]["retries"])
+        d = get_json(base.format(page=p), timeout=crawl["timeout"],
+                     retries=crawl["retries"])
         items = (d or {}).get("data", {}).get("albums", []) if d else []
         if not items:
             empty_streak += 1
