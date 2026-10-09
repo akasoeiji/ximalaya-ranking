@@ -72,9 +72,9 @@ a{color:inherit}
 .chip.on{color:#fff;border-color:transparent}
 select{padding:8px 10px;border:1px solid #dee2e6;border-radius:10px;background:#fff;font-size:13px;color:#495057;outline:none;cursor:pointer}
 .meta{font-size:12px;color:var(--sub);margin-top:8px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
-.tbl-card{background:var(--card);border-radius:16px;box-shadow:0 2px 10px rgba(20,40,80,.06);margin-top:12px;overflow:hidden}
+.tbl-card{background:var(--card);border-radius:16px;box-shadow:0 2px 10px rgba(20,40,80,.06);margin-top:12px;overflow:hidden;overflow:clip}
 table.main{width:100%;border-collapse:collapse}
-table.main thead th{position:sticky;top:55px;z-index:10;background:#f8f9fa;font-size:12.5px;color:#868e96;text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.main thead th{position:sticky;top:var(--thead-top,55px);z-index:10;background:#f8f9fa;font-size:12.5px;color:#868e96;text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
 table.main td{padding:11px 12px;border-bottom:1px solid #f1f3f5;vertical-align:middle}
 tr.arow:hover td{background:#fafbfd} tr.arow.expanded td{background:#fff8f0}
 .rank{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;border-radius:8px;font-weight:700;font-size:13px;color:#868e96;background:#f1f3f5}
@@ -478,6 +478,9 @@ function syncChips(){
   clearTimeout(tm);tm=setTimeout(function(){state.q=e.target.value.trim();render();},140);
  });
  document.getElementById("sort").addEventListener("change",function(e){state.s=+e.target.value;render();});
+ /* 表头吸顶位置 = 工具栏实际高度(修复表头遮挡首行/钻入工具栏下方) */
+ function syncTheadTop(){var t=document.querySelector(".toolbar");if(t)document.documentElement.style.setProperty("--thead-top",t.offsetHeight+"px");}
+ syncTheadTop();window.addEventListener("resize",syncTheadTop);
  buildChips();render();
 })();
 </script>
