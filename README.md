@@ -56,6 +56,8 @@ docker run --rm -e RUN_MODE=schedule -e SCHEDULE_INTERVAL_SECONDS=86400 \
 
 **在线榜单**：<https://totootao.github.io/ximalaya-ranking/>
 
+> **首次部署前需手动启用 Pages**（一次性）：仓库 `Settings → Pages → Build and deployment → Source` 选择 **GitHub Actions**。GitHub 出于安全设计，自动生成的 `GITHUB_TOKEN` 无权创建 Pages 站点，故 workflow 中不再使用 `configure-pages` 的 `enablement` 参数，需手动开启一次后即可持续自动部署。私有仓库需为公开仓库或付费计划才能使用 Pages。
+
 需要的仓库 Secrets（Settings → Secrets and variables → Actions）：
 
 | Secret | 说明 |
@@ -112,3 +114,4 @@ entrypoint.sh       # manual / schedule 双模式
 ## 需求更新记录
 
 - 2026-10-08 增加「生活-生活闲聊」分类（a1006_b294641），支持多分类并行爬取与分榜单输出，新增多分类总索引页
+- 2026-10-09 修复 GitHub Actions Pages 部署报错（GITHUB_TOKEN 无权创建 Pages 站点，移除 configure-pages 的 enablement 参数，改为首次手动启用 Pages）
