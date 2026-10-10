@@ -116,3 +116,4 @@ entrypoint.sh       # manual / schedule 双模式
 - 2026-10-08 增加「生活-生活闲聊」分类（a1006_b294641），支持多分类并行爬取与分榜单输出，新增多分类总索引页
 - 2026-10-09 修复 GitHub Actions Pages 部署报错（GITHUB_TOKEN 无权创建 Pages 站点，移除 configure-pages 的 enablement 参数，改为首次手动启用 Pages）
 - 2026-10-09 修复排行榜表头（thead）遮挡第一行的样式问题（表头吸顶位置动态适配工具栏实际高度，避免钻入工具栏下方）
+- 2026-10-09 修复主播专辑明细表（table.alb）表头吸顶遮挡行内容的问题（明细区滚动范围小，移除其 thead 的 sticky 定位）

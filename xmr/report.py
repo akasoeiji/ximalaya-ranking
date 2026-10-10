@@ -101,7 +101,7 @@ tr.det td{padding:0;background:#fbfcfe}
 .dhead{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:10px;font-size:12px;color:var(--sub)}
 .dhead b{color:var(--ink);font-size:13px}
 table.alb{width:100%;border-collapse:collapse;font-size:12.8px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 0 0 1px var(--line)}
-table.alb th{background:#f8f9fa;text-align:left;padding:7px 10px;font-size:11.5px;color:#868e96;position:sticky;top:0}
+table.alb th{background:#f8f9fa;text-align:left;padding:7px 10px;font-size:11.5px;color:#868e96}
 table.alb td{padding:6.5px 10px;border-bottom:1px solid #f6f7f9}
 table.alb tr:hover td{background:#fffdf5}
 .alb .r{color:#ced4da;width:34px}
